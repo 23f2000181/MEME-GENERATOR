@@ -86,155 +86,155 @@ export default function TextEditor({ imageUrl, onSave, onCancel }: TextEditorPro
   const selectedLayerData = textLayers.find(layer => layer.id === selectedLayer);
 
   return (
-    <div className="space-y-4">
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+    <div className="space-y-4 max-w-4xl mx-auto">
+      <div className="bg-[#2d2d2d] border border-[#10a37f] rounded-lg p-3">
+        <p className="text-sm text-[#10a37f]">
           ✏️ Text Editor Mode - Add text layers to your meme template
         </p>
       </div>
 
-      {/* Preview */}
-      <div className="relative rounded-lg overflow-hidden border-2 border-blue-300 dark:border-blue-600">
-        <img
-          src={imageUrl}
-          alt="Meme template"
-          className="w-full h-auto"
-        />
-        {/* Text layers preview */}
-        <div className="absolute inset-0 pointer-events-none">
-          {textLayers.map((layer) => (
-            <div
-              key={layer.id}
-              className="absolute"
-              style={{
-                left: `${layer.x}%`,
-                top: `${layer.y}%`,
-                transform: 'translate(-50%, -50%)',
-              }}
-            >
-              <p
-                className="text-center whitespace-nowrap"
-                style={{
-                  fontSize: `${layer.fontSize}px`,
-                  color: layer.color,
-                  fontFamily: layer.fontFamily,
-                  fontWeight: 'bold',
-                  textTransform: 'uppercase',
-                  WebkitTextStroke: `${layer.strokeWidth}px ${layer.strokeColor}`,
-                  paintOrder: 'stroke fill',
-                  textShadow: `2px 2px 0 ${layer.strokeColor}, -2px -2px 0 ${layer.strokeColor}, 2px -2px 0 ${layer.strokeColor}, -2px 2px 0 ${layer.strokeColor}`,
-                }}
-              >
-                {layer.text}
-              </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Preview */}
+        <div className="lg:col-span-2">
+          <div className="relative rounded-lg overflow-hidden border-2 border-[#404040] bg-[#1a1a1a]">
+            <img
+              src={imageUrl}
+              alt="Meme template"
+              className="w-full h-auto"
+            />
+            {/* Text layers preview */}
+            <div className="absolute inset-0 pointer-events-none">
+              {textLayers.map((layer) => (
+                <div
+                  key={layer.id}
+                  className="absolute"
+                  style={{
+                    left: `${layer.x}%`,
+                    top: `${layer.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <p
+                    className="text-center whitespace-nowrap"
+                    style={{
+                      fontSize: `${layer.fontSize}px`,
+                      color: layer.color,
+                      fontFamily: layer.fontFamily,
+                      fontWeight: 'bold',
+                      textTransform: 'uppercase',
+                      WebkitTextStroke: `${layer.strokeWidth}px ${layer.strokeColor}`,
+                      paintOrder: 'stroke fill',
+                      textShadow: `2px 2px 0 ${layer.strokeColor}, -2px -2px 0 ${layer.strokeColor}, 2px -2px 0 ${layer.strokeColor}, -2px 2px 0 ${layer.strokeColor}`,
+                    }}
+                  >
+                    {layer.text}
+                  </p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Text Layers */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-            Text Layers ({textLayers.length})
-          </h3>
-          <button
-            type="button"
-            onClick={addTextLayer}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-          >
-            + Add Text
-          </button>
-        </div>
-
-        {textLayers.length === 0 && (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p className="text-sm">No text layers yet. Click "Add Text" to get started!</p>
           </div>
-        )}
+        </div>
 
-        {textLayers.map((layer) => (
-          <div
-            key={layer.id}
-            className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-              selectedLayer === layer.id
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-            }`}
-            onClick={() => setSelectedLayer(layer.id)}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {layer.text || 'Empty text'}
-              </span>
+        {/* Side Panel */}
+        <div className="space-y-4">
+          {/* Text Layers List */}
+          <div className="bg-[#1a1a1a] border border-[#404040] rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm text-white">
+                Layers ({textLayers.length})
+              </h3>
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteLayer(layer.id);
-                }}
-                className="text-red-600 hover:text-red-700 text-sm font-medium"
+                onClick={addTextLayer}
+                className="px-2 py-1 bg-[#10a37f] hover:bg-[#0d8966] text-white rounded text-xs font-medium transition-colors"
               >
-                Delete
+                + Add
               </button>
             </div>
+
+            {textLayers.length === 0 && (
+              <div className="text-center py-4 text-gray-500 text-xs">
+                <p>No text layers yet</p>
+              </div>
+            )}
+
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {textLayers.map((layer) => (
+                <button
+                  key={layer.id}
+                  type="button"
+                  onClick={() => setSelectedLayer(layer.id)}
+                  className={`w-full text-left px-2 py-2 rounded text-xs transition-all ${
+                    selectedLayer === layer.id
+                      ? 'bg-[#10a37f]/20 border border-[#10a37f] text-[#10a37f]'
+                      : 'bg-[#2d2d2d] border border-[#404040] text-gray-300 hover:border-[#10a37f]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="truncate font-medium">{layer.text || 'Empty'}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteLayer(layer.id);
+                      }}
+                      className="text-red-400 hover:text-red-300 ml-1"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        ))}
+        </div>
       </div>
 
       {/* Text Editor Controls */}
       {selectedLayerData && (
-        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg space-y-3">
-          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
-            Edit Text Layer
-          </h4>
+        <div className="bg-[#1a1a1a] border border-[#404040] rounded-lg p-4 space-y-3">
+          <h4 className="font-semibold text-white text-sm">Edit Layer</h4>
 
           {/* Text Content */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Text
-            </label>
+            <label className="text-xs font-semibold text-gray-400 mb-1 block">Text</label>
             <input
               type="text"
               value={selectedLayerData.text}
               onChange={(e) => updateLayer(selectedLayerData.id, { text: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              className="w-full px-3 py-2 rounded border border-[#404040] bg-[#2d2d2d] text-white text-sm focus:outline-none focus:border-[#10a37f]"
             />
           </div>
 
           {/* Position */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Horizontal Position (%)
-              </label>
+              <label className="text-xs font-semibold text-gray-400 mb-1 block">X Position %</label>
               <input
                 type="number"
                 min="0"
                 max="100"
                 value={selectedLayerData.x}
                 onChange={(e) => updateLayer(selectedLayerData.id, { x: Number(e.target.value) })}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full px-2 py-2 rounded border border-[#404040] bg-[#2d2d2d] text-white text-sm focus:outline-none focus:border-[#10a37f]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Vertical Position (%)
-              </label>
+              <label className="text-xs font-semibold text-gray-400 mb-1 block">Y Position %</label>
               <input
                 type="number"
                 min="0"
                 max="100"
                 value={selectedLayerData.y}
                 onChange={(e) => updateLayer(selectedLayerData.id, { y: Number(e.target.value) })}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full px-2 py-2 rounded border border-[#404040] bg-[#2d2d2d] text-white text-sm focus:outline-none focus:border-[#10a37f]"
               />
             </div>
           </div>
 
           {/* Font Size */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="text-xs font-semibold text-gray-400 mb-2 block">
               Font Size: {selectedLayerData.fontSize}px
             </label>
             <input
@@ -243,39 +243,35 @@ export default function TextEditor({ imageUrl, onSave, onCancel }: TextEditorPro
               max="100"
               value={selectedLayerData.fontSize}
               onChange={(e) => updateLayer(selectedLayerData.id, { fontSize: Number(e.target.value) })}
-              className="w-full"
+              className="w-full accent-[#10a37f]"
             />
           </div>
 
           {/* Colors */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Text Color
-              </label>
+              <label className="text-xs font-semibold text-gray-400 mb-2 block">Text Color</label>
               <input
                 type="color"
                 value={selectedLayerData.color}
                 onChange={(e) => updateLayer(selectedLayerData.id, { color: e.target.value })}
-                className="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600"
+                className="w-full h-8 rounded border border-[#404040] cursor-pointer"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Outline Color
-              </label>
+              <label className="text-xs font-semibold text-gray-400 mb-2 block">Outline Color</label>
               <input
                 type="color"
                 value={selectedLayerData.strokeColor}
                 onChange={(e) => updateLayer(selectedLayerData.id, { strokeColor: e.target.value })}
-                className="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600"
+                className="w-full h-8 rounded border border-[#404040] cursor-pointer"
               />
             </div>
           </div>
 
           {/* Stroke Width */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="text-xs font-semibold text-gray-400 mb-2 block">
               Outline Width: {selectedLayerData.strokeWidth}px
             </label>
             <input
@@ -284,19 +280,17 @@ export default function TextEditor({ imageUrl, onSave, onCancel }: TextEditorPro
               max="8"
               value={selectedLayerData.strokeWidth}
               onChange={(e) => updateLayer(selectedLayerData.id, { strokeWidth: Number(e.target.value) })}
-              className="w-full"
+              className="w-full accent-[#10a37f]"
             />
           </div>
 
           {/* Font Family */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Font
-            </label>
+            <label className="text-xs font-semibold text-gray-400 mb-1 block">Font</label>
             <select
               value={selectedLayerData.fontFamily}
               onChange={(e) => updateLayer(selectedLayerData.id, { fontFamily: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              className="w-full px-3 py-2 rounded border border-[#404040] bg-[#2d2d2d] text-gray-300 text-sm focus:outline-none focus:border-[#10a37f]"
             >
               <option value="Impact">Impact (Classic Meme)</option>
               <option value="Arial Black">Arial Black</option>
@@ -314,17 +308,17 @@ export default function TextEditor({ imageUrl, onSave, onCancel }: TextEditorPro
           type="button"
           onClick={handleSave}
           disabled={isProcessing || textLayers.length === 0}
-          className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-all"
+          className="flex-1 bg-[#10a37f] hover:bg-[#0d8966] disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-all text-sm"
         >
-          {isProcessing ? 'Processing...' : '✅ Save Meme with Text'}
+          {isProcessing ? '⏳ Processing...' : '✅ Save Meme with Text'}
         </button>
         <button
           type="button"
           onClick={onCancel}
           disabled={isProcessing}
-          className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:text-gray-200 font-bold py-3 px-6 rounded-lg transition-all"
+          className="flex-1 bg-[#2d2d2d] hover:bg-[#3d3d3d] disabled:opacity-50 disabled:cursor-not-allowed text-gray-300 font-bold py-3 px-4 rounded-lg transition-all text-sm"
         >
-          Cancel
+          ✕ Cancel
         </button>
       </div>
     </div>
