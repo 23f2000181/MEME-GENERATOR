@@ -1,0 +1,1727 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Code listing settings
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    showstringspaces=false
+}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{AI Meme Generator}
+\lhead{Hackathon Documentation}
+\rfoot{Page \thepage}
+
+% Title formatting
+\titleformat{\section}{\Large\bfseries\color{blue!70!black}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{blue!50!black}}{\thesubsection}{1em}{}
+
+\begin{document}
+
+% Title Page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\Huge\bfseries AI Meme Generator\par}
+    \vspace{1cm}
+    {\Large Intelligent Meme Creation with Google Gemini\par}
+    \vspace{2cm}
+
+    {\large\textbf{Tech Stack:}}\\[0.5cm]
+    {\large Next.js 16 $\cdot$ React 19 $\cdot$ TypeScript 5.9 $\cdot$ Google Gemini AI\par}
+    \vspace{3cm}
+
+    \begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title=Project Overview]
+    An AI-powered meme generator leveraging Google's Gemini 2.5 Flash and Nano Banana models through OpenRouter. Features dual generation modes (Auto and Manual), interactive text editing, SQLite history tracking, and production-ready error handling with exponential backoff retry logic.
+    \end{tcolorbox}
+
+    \vfill
+
+    {\large Hackathon Documentation\\
+    Version 1.0\\
+    \today\par}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ============================================
+% SECTION 1: INTRODUCTION
+% ============================================
+
+\section{Introduction}
+
+\subsection{Project Vision}
+The AI Meme Generator is a modern web application that democratizes meme creation by combining artificial intelligence with intuitive user interfaces. It bridges the gap between casual users who want quick meme generation and creative users who desire complete control over their content.
+
+\subsection{Key Objectives}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Accessibility}: Enable anyone to create professional memes without design skills
+    \item \textbf{Flexibility}: Offer multiple creation modes for different user needs
+    \item \textbf{Quality}: Leverage state-of-the-art AI models for high-quality output
+    \item \textbf{Persistence}: Track and store meme history for future reference
+    \item \textbf{Reliability}: Implement production-ready error handling
+\end{itemize}
+
+\subsection{Problem Statement}
+Traditional meme creation requires:
+\begin{enumerate}
+    \item Manual image sourcing or creation
+    \item Photo editing software knowledge
+    \item Typography and design skills
+    \item Time-consuming iteration
+\end{enumerate}
+
+Our solution automates the image generation process while providing flexible text handling options, reducing meme creation from minutes to seconds.
+
+% ============================================
+% SECTION 2: TECHNOLOGY STACK
+% ============================================
+
+\section{Technology Stack}
+
+\subsection{Frontend Technologies}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Frontend Stack]
+\begin{description}[leftmargin=3cm,style=nextline]
+    \item[Framework] Next.js 16.0.3
+    \item[UI Library] React 19.2.0
+    \item[Language] TypeScript 5.9.3
+    \item[Styling] Tailwind CSS 4.1.17
+    \item[State Management] React Hooks (useState, useEffect)
+\end{description}
+\end{tcolorbox}
+
+\textbf{Why Next.js 14+ App Router?}
+\begin{itemize}
+    \item Server-side rendering for optimal performance
+    \item Built-in API routes for backend logic
+    \item File-based routing system
+    \item React Server Components for reduced bundle size
+    \item Automatic code splitting
+\end{itemize}
+
+\subsection{Backend Technologies}
+
+\begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title=Backend Stack]
+\begin{description}[leftmargin=3cm,style=nextline]
+    \item[Runtime] Node.js (via Next.js)
+    \item[API Routes] Next.js API Routes
+    \item[AI Provider] OpenRouter API
+    \item[Database] SQLite 3 (Better-sqlite3 12.4.1)
+    \item[Image Processing] Node Canvas 3.2.0
+    \item[Validation] Zod 4.1.12
+    \item[Environment] dotenv 17.2.3
+\end{description}
+\end{tcolorbox}
+
+\subsection{AI Models}
+
+\begin{enumerate}
+    \item \textbf{Google Gemini 2.5 Flash Lite} (\texttt{google/gemini-2.5-flash-lite})
+    \begin{itemize}
+        \item Purpose: Structured JSON generation
+        \item Usage: Converts user ideas into detailed meme specifications
+        \item Output: Scene descriptions, styles, moods, captions
+    \end{itemize}
+
+    \item \textbf{Nano Banana / Gemini 2.5 Flash Image} (\texttt{google/gemini-2.5-flash-image})
+    \begin{itemize}
+        \item Purpose: Image generation
+        \item Usage: Creates meme images from text prompts
+        \item Output: Base64-encoded PNG/JPEG images
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Development Tools}
+
+\begin{lstlisting}[language=json,caption=Key Dependencies from package.json]
+{
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@tailwindcss/postcss": "^4.1.17",
+    "better-sqlite3": "^12.4.1",
+    "canvas": "^3.2.0",
+    "dotenv": "^17.2.3",
+    "next": "^16.0.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.1.12"
+  }
+}
+\end{lstlisting}
+
+% ============================================
+% SECTION 3: ARCHITECTURE
+% ============================================
+
+\section{System Architecture}
+
+\subsection{High-Level Architecture}
+
+The application follows a modern three-tier architecture:
+
+\begin{enumerate}
+    \item \textbf{Presentation Layer}: React components with TypeScript
+    \item \textbf{Application Layer}: Next.js API routes with business logic
+    \item \textbf{Data Layer}: SQLite database and AI API integration
+\end{enumerate}
+
+\subsection{Project Structure}
+
+\begin{lstlisting}[language=bash,caption=Directory Tree]
+/home/user/new-meme-bot/
+├── app/                          # Next.js App Router
+│   ├── api/meme/                 # API Routes
+│   │   ├── auto/route.ts         # Auto mode endpoint
+│   │   ├── manual/route.ts       # Manual mode endpoint
+│   │   ├── add-text/route.ts     # Text editor endpoint
+│   │   └── history/route.ts      # History retrieval endpoint
+│   ├── components/               # React Components
+│   │   ├── AutoMode.tsx          # Auto mode form
+│   │   ├── ManualMode.tsx        # Manual mode form
+│   │   ├── TextEditor.tsx        # Interactive text editor
+│   │   └── History.tsx           # Meme history gallery
+│   ├── globals.css               # Global styles
+│   ├── layout.tsx                # Root layout
+│   └── page.tsx                  # Main page (entry point)
+├── lib/                          # Library/Utility Files
+│   ├── openrouter.ts             # OpenRouter API client
+│   ├── gemini.ts                 # Legacy Gemini client
+│   ├── imageOverlay.ts           # Canvas text overlay
+│   ├── schemas.ts                # Zod schemas & validation
+│   └── db.ts                     # SQLite database logic
+├── .env                          # Environment variables
+├── package.json                  # Dependencies
+├── next.config.js                # Next.js configuration
+├── tailwind.config.js            # Tailwind configuration
+└── tsconfig.json                 # TypeScript configuration
+\end{lstlisting}
+
+\subsection{Component Architecture}
+
+\textbf{Main Page (app/page.tsx)}
+\begin{itemize}
+    \item Central UI orchestrator
+    \item State management for views and modes
+    \item Image display and download functionality
+    \item Loading and error state handling
+\end{itemize}
+
+\textbf{State Variables:}
+\begin{lstlisting}[language=typescript]
+view: 'generator' | 'history'
+mode: 'auto' | 'manual'
+generatedImage: string | null
+loading: boolean
+error: string | null
+isEditingText: boolean
+isBlankTemplate: boolean
+\end{lstlisting}
+
+% ============================================
+% SECTION 4: CORE COMPONENTS
+% ============================================
+
+\section{Core Components}
+
+\subsection{AutoMode Component}
+
+\textbf{Purpose:} AI-assisted meme creation with structured prompts
+
+\textbf{Features:}
+\begin{itemize}
+    \item Natural language meme idea input
+    \item Optional custom captions (top/center/bottom)
+    \item Text overlay toggle (programmatic vs AI-generated)
+    \item Example prompts for user inspiration
+\end{itemize}
+
+\textbf{User Workflow:}
+\begin{enumerate}
+    \item User enters meme idea (e.g., "cat surprised by technology")
+    \item Optionally adds 1-3 custom captions with positions
+    \item Chooses text overlay method
+    \item Submits form
+    \item Receives AI-generated meme
+\end{enumerate}
+
+\subsection{ManualMode Component}
+
+\textbf{Purpose:} Full creative control over image generation
+
+\textbf{Features:}
+\begin{itemize}
+    \item Direct image prompt input
+    \item Aspect ratio selection (1:1, 16:9, 4:3, 9:16, 3:4)
+    \item Blank template mode for custom text editing
+    \item Example prompts with different strategies
+\end{itemize}
+
+\textbf{User Workflow:}
+\begin{enumerate}
+    \item User writes detailed prompt
+    \item Selects desired aspect ratio
+    \item Optionally requests blank template
+    \item Submits form
+    \item If blank: Opens text editor
+    \item If normal: Displays final meme
+\end{enumerate}
+
+\subsection{TextEditor Component}
+
+\textbf{Purpose:} Interactive text overlay editor with real-time preview
+
+\textbf{Features:}
+\begin{itemize}
+    \item Visual preview with draggable text positioning
+    \item Multiple text layer support
+    \item Comprehensive customization options:
+    \begin{itemize}
+        \item Text content
+        \item Position (X/Y percentage, 0-100)
+        \item Font size (20-100px)
+        \item Text color (hex color picker)
+        \item Stroke color and width
+        \item Font family (Impact, Arial Black, Comic Sans, etc.)
+    \end{itemize}
+    \item Real-time preview rendering
+    \item Server-side final rendering for consistency
+\end{itemize}
+
+\textbf{Technical Implementation:}
+\begin{lstlisting}[language=typescript,caption=Text Layer Interface]
+interface TextLayer {
+  id: string;
+  text: string;
+  x: number;        // Percentage (0-100)
+  y: number;        // Percentage (0-100)
+  fontSize: number; // Pixels (20-100)
+  color: string;    // Hex color
+  fontFamily: string;
+  strokeColor: string;
+  strokeWidth: number;
+}
+\end{lstlisting}
+
+\subsection{History Component}
+
+\textbf{Purpose:} Meme gallery and historical tracking
+
+\textbf{Features:}
+\begin{itemize}
+    \item Grid view of all generated memes
+    \item Mode badges (Auto/Manual)
+    \item Timestamp display
+    \item Click-to-view details modal
+    \item Individual meme download
+    \item Metadata display (user input, prompts, captions)
+\end{itemize}
+
+% ============================================
+% SECTION 5: API DOCUMENTATION
+% ============================================
+
+\section{API Endpoints}
+
+\subsection{POST /api/meme/auto}
+
+\textbf{Purpose:} Auto mode meme generation with AI assistance
+
+\textbf{Request Body:}
+\begin{lstlisting}[language=json]
+{
+  "idea": "A cat surprised by technology",
+  "captions": [
+    {
+      "text": "WHEN YOU SEE",
+      "position": "top"
+    },
+    {
+      "text": "THE WIFI PASSWORD",
+      "position": "bottom"
+    }
+  ],
+  "useOverlay": true
+}
+\end{lstlisting}
+
+\textbf{Processing Pipeline:}
+\begin{enumerate}
+    \item Validate request with Zod schema
+    \item Call Gemini 2.5 Flash Lite for structured JSON
+    \item Generate meme metadata:
+    \begin{itemize}
+        \item Scene description
+        \item Visual style
+        \item Mood/tone
+        \item Caption refinements
+        \item Aspect ratio
+    \end{itemize}
+    \item Build detailed prompt for image generation
+    \item Call Nano Banana for image generation
+    \item Optionally apply programmatic text overlay
+    \item Save to SQLite database
+    \item Return image + metadata
+\end{enumerate}
+
+\textbf{Response:}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "image": "data:image/png;base64,iVBORw0KGgo...",
+  "metadata": {
+    "sceneDescription": "A wide-eyed cat...",
+    "style": "photorealistic digital art",
+    "mood": "surprised and curious",
+    "captions": [
+      {"text": "WHEN YOU SEE", "position": "top"},
+      {"text": "THE WIFI PASSWORD", "position": "bottom"}
+    ],
+    "aspectRatio": "1:1"
+  },
+  "mode": "auto",
+  "overlayUsed": true
+}
+\end{lstlisting}
+
+\subsection{POST /api/meme/manual}
+
+\textbf{Purpose:} Manual mode direct image generation
+
+\textbf{Request Body:}
+\begin{lstlisting}[language=json]
+{
+  "prompt": "A surprised cat with wide eyes staring at a computer screen showing binary code, photorealistic style",
+  "aspectRatio": "1:1",
+  "blankTemplate": false
+}
+\end{lstlisting}
+
+\textbf{Processing Pipeline:}
+\begin{enumerate}
+    \item Validate request
+    \item If blank template: Modify prompt to exclude text
+    \item Call Nano Banana directly for image generation
+    \item Save to database
+    \item Return image
+\end{enumerate}
+
+\textbf{Response:}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "image": "data:image/png;base64,iVBORw0KGgo...",
+  "mode": "manual",
+  "blankTemplate": false
+}
+\end{lstlisting}
+
+\subsection{POST /api/meme/add-text}
+
+\textbf{Purpose:} Server-side text rendering on images
+
+\textbf{Request Body:}
+\begin{lstlisting}[language=json]
+{
+  "imageUrl": "data:image/png;base64,...",
+  "textLayers": [
+    {
+      "id": "layer-123",
+      "text": "HELLO WORLD",
+      "x": 50,
+      "y": 20,
+      "fontSize": 48,
+      "color": "#FFFFFF",
+      "fontFamily": "Impact",
+      "strokeColor": "#000000",
+      "strokeWidth": 3
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Processing Pipeline:}
+\begin{enumerate}
+    \item Load base image from base64 data URL
+    \item Create Canvas context
+    \item For each text layer:
+    \begin{itemize}
+        \item Apply font settings
+        \item Calculate position from percentage
+        \item Render stroke (outline)
+        \item Render fill (text)
+    \end{itemize}
+    \item Export composite image as PNG
+    \item Return base64-encoded result
+\end{enumerate}
+
+\subsection{GET /api/meme/history}
+
+\textbf{Purpose:} Retrieve meme generation history
+
+\textbf{Query Parameters:}
+\begin{itemize}
+    \item \texttt{limit} (optional): Number of memes to retrieve (default: 50)
+\end{itemize}
+
+\textbf{Response:}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "memes": [
+    {
+      "id": 1,
+      "mode": "auto",
+      "user_input": "cat surprised by technology",
+      "generated_prompt": "A photorealistic...",
+      "image_data": "data:image/png;base64,...",
+      "metadata": {
+        "sceneDescription": "...",
+        "style": "...",
+        "captions": [...]
+      },
+      "created_at": "2025-11-14T10:30:00Z"
+    }
+  ],
+  "count": 10
+}
+\end{lstlisting}
+
+% ============================================
+% SECTION 6: DATABASE SCHEMA
+% ============================================
+
+\section{Database Schema}
+
+\subsection{Database Technology}
+
+\textbf{SQLite 3} with \textbf{Better-sqlite3} driver
+\begin{itemize}
+    \item Lightweight, file-based database
+    \item Zero configuration required
+    \item ACID-compliant transactions
+    \item Synchronous API (better for Next.js)
+    \item Perfect for single-server deployments
+\end{itemize}
+
+\subsection{Table: users}
+
+\textbf{Purpose:} Future user authentication and tracking
+
+\begin{lstlisting}[language=sql,caption=Users Table Schema]
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  api_usage INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+\end{lstlisting}
+
+\textbf{Fields:}
+\begin{description}
+    \item[id] Auto-incrementing primary key
+    \item[email] Unique user email address
+    \item[api\_usage] Tracks API call count for rate limiting
+    \item[created\_at] Account creation timestamp
+\end{description}
+
+\subsection{Table: memes}
+
+\textbf{Purpose:} Store all generated memes with metadata
+
+\begin{lstlisting}[language=sql,caption=Memes Table Schema]
+CREATE TABLE IF NOT EXISTS memes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  mode VARCHAR(10) CHECK(mode IN ('auto', 'manual')),
+  user_input TEXT NOT NULL,
+  generated_prompt TEXT,
+  image_path TEXT,
+  image_data TEXT,
+  metadata JSON,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+\end{lstlisting}
+
+\textbf{Fields:}
+\begin{description}
+    \item[id] Auto-incrementing primary key
+    \item[user\_id] Foreign key to users table (nullable for now)
+    \item[mode] Generation mode: 'auto' or 'manual'
+    \item[user\_input] Original user idea/prompt
+    \item[generated\_prompt] AI-generated image prompt
+    \item[image\_path] File path (for future file storage)
+    \item[image\_data] Base64-encoded image data
+    \item[metadata] JSON blob with additional info (style, captions, etc.)
+    \item[created\_at] Meme creation timestamp
+\end{description}
+
+\subsection{Indexes}
+
+\begin{lstlisting}[language=sql,caption=Database Indexes]
+CREATE INDEX IF NOT EXISTS idx_memes_user_id
+  ON memes(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_memes_created_at
+  ON memes(created_at DESC);
+\end{lstlisting}
+
+\textbf{Purpose:}
+\begin{itemize}
+    \item \texttt{idx\_memes\_user\_id}: Fast user-specific queries
+    \item \texttt{idx\_memes\_created\_at}: Efficient chronological sorting
+\end{itemize}
+
+\subsection{Database Functions}
+
+\textbf{lib/db.ts} provides these core functions:
+
+\begin{enumerate}
+    \item \texttt{initializeDatabase()}: Creates tables and indexes
+    \item \texttt{saveMeme(...)}: Saves a generated meme
+    \item \texttt{getUserMemes(userId, limit)}: Retrieves user's memes
+    \item \texttt{getRecentMemes(limit)}: Gets recent public memes
+    \item \texttt{updateUserUsage(userId)}: Increments API usage counter
+\end{enumerate}
+
+% ============================================
+% SECTION 7: USER FLOWS
+% ============================================
+
+\section{User Flows}
+
+\subsection{Auto Mode Flow}
+
+\begin{enumerate}
+    \item \textbf{User Input Phase}
+    \begin{itemize}
+        \item User navigates to main page
+        \item Selects "Auto" mode
+        \item Enters meme idea (e.g., "cat surprised by technology")
+        \item Optionally adds 1-3 custom captions
+        \item Chooses text overlay method
+    \end{itemize}
+
+    \item \textbf{Frontend Processing}
+    \begin{itemize}
+        \item Form validation
+        \item Set loading state
+        \item POST request to \texttt{/api/meme/auto}
+    \end{itemize}
+
+    \item \textbf{Backend AI Processing}
+    \begin{itemize}
+        \item Call Gemini Flash Lite for structured JSON
+        \item Receive meme specification:
+        \begin{itemize}
+            \item Scene description
+            \item Visual style
+            \item Mood/tone
+            \item Refined captions
+            \item Aspect ratio
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{Image Generation}
+    \begin{itemize}
+        \item Build detailed prompt from AI metadata
+        \item Call Nano Banana (Gemini Flash Image)
+        \item Receive base64-encoded image
+    \end{itemize}
+
+    \item \textbf{Text Overlay (Optional)}
+    \begin{itemize}
+        \item If \texttt{useOverlay === true}:
+        \begin{itemize}
+            \item Load image into Canvas
+            \item Apply Impact font with white text + black stroke
+            \item Position captions (top/center/bottom)
+            \item Export final composite
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{Data Persistence}
+    \begin{itemize}
+        \item Save meme to SQLite database
+        \item Store: user input, prompt, image, metadata, timestamp
+    \end{itemize}
+
+    \item \textbf{Frontend Display}
+    \begin{itemize}
+        \item Receive response with image + metadata
+        \item Display image
+        \item Enable download button
+        \item Show success message
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Manual Mode Flow}
+
+\begin{enumerate}
+    \item \textbf{User Input Phase}
+    \begin{itemize}
+        \item User selects "Manual" mode
+        \item Writes detailed image prompt
+        \item Selects aspect ratio (1:1, 16:9, etc.)
+        \item Optionally enables "Blank Template" mode
+    \end{itemize}
+
+    \item \textbf{Frontend Processing}
+    \begin{itemize}
+        \item Form validation
+        \item Set loading state
+        \item POST request to \texttt{/api/meme/manual}
+    \end{itemize}
+
+    \item \textbf{Backend Processing}
+    \begin{itemize}
+        \item If blank template: Append "no text, blank, clean" to prompt
+        \item Call Nano Banana directly (skip structure generation)
+        \item Receive base64-encoded image
+    \end{itemize}
+
+    \item \textbf{Data Persistence}
+    \begin{itemize}
+        \item Save to database with mode='manual'
+    \end{itemize}
+
+    \item \textbf{Frontend Display - Branch A: Normal Meme}
+    \begin{itemize}
+        \item Display image
+        \item Enable download
+    \end{itemize}
+
+    \item \textbf{Frontend Display - Branch B: Blank Template}
+    \begin{itemize}
+        \item Automatically open Text Editor
+        \item Load image as background
+        \item Enable text layer creation
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Text Editor Flow}
+
+\begin{enumerate}
+    \item \textbf{Editor Initialization}
+    \begin{itemize}
+        \item Load base image
+        \item Initialize empty text layers array
+        \item Set up canvas preview
+    \end{itemize}
+
+    \item \textbf{Text Layer Creation}
+    \begin{itemize}
+        \item User clicks "Add Text Layer"
+        \item New layer added with defaults:
+        \begin{itemize}
+            \item Text: "Your text here"
+            \item Position: (50\%, 50\%)
+            \item Font: Impact, 48px
+            \item Color: White (\#FFFFFF)
+            \item Stroke: Black (\#000000), 3px
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{Real-time Customization}
+    \begin{itemize}
+        \item User adjusts layer properties:
+        \begin{itemize}
+            \item Text content (input field)
+            \item X/Y position (sliders 0-100\%)
+            \item Font size (slider 20-100px)
+            \item Text color (color picker)
+            \item Stroke color (color picker)
+            \item Stroke width (slider 0-10px)
+            \item Font family (dropdown)
+        \end{itemize}
+        \item Preview updates on every change
+    \end{itemize}
+
+    \item \textbf{Server-side Rendering}
+    \begin{itemize}
+        \item User clicks "Save Meme with Text"
+        \item POST to \texttt{/api/meme/add-text}
+        \item Backend renders text with Node Canvas
+        \item Returns final composite image
+    \end{itemize}
+
+    \item \textbf{Final Display}
+    \begin{itemize}
+        \item Display final meme
+        \item Enable download
+        \item Exit editor mode
+    \end{itemize}
+\end{enumerate}
+
+\subsection{History Flow}
+
+\begin{enumerate}
+    \item \textbf{User Navigation}
+    \begin{itemize}
+        \item User clicks "View History"
+        \item Frontend switches to history view
+    \end{itemize}
+
+    \item \textbf{Data Fetching}
+    \begin{itemize}
+        \item GET request to \texttt{/api/meme/history?limit=50}
+        \item Backend queries SQLite database
+        \item Returns array of meme objects
+    \end{itemize}
+
+    \item \textbf{Grid Display}
+    \begin{itemize}
+        \item Render memes in responsive grid
+        \item Show thumbnails with badges (Auto/Manual)
+        \item Display creation timestamps
+    \end{itemize}
+
+    \item \textbf{Detail View}
+    \begin{itemize}
+        \item User clicks meme
+        \item Modal opens with:
+        \begin{itemize}
+            \item Full-size image
+            \item Original user input
+            \item Generated prompt
+            \item Metadata (style, mood, captions)
+            \item Download button
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+% ============================================
+% SECTION 8: KEY LIBRARIES
+% ============================================
+
+\section{Key Library Files}
+
+\subsection{lib/openrouter.ts}
+
+\textbf{Purpose:} OpenRouter API client with production-ready error handling
+
+\textbf{Key Features:}
+\begin{itemize}
+    \item Exponential backoff retry logic
+    \item 5 retry attempts with delays: 1s, 2s, 4s, 8s, 60s
+    \item Handles rate limit errors (429, 503)
+    \item Markdown code block stripping
+    \item Multiple image format detection
+\end{itemize}
+
+\textbf{Main Functions:}
+
+\begin{enumerate}
+    \item \texttt{generateStructuredJSON<T>(prompt, schema, model)}
+    \begin{itemize}
+        \item Generates structured JSON output
+        \item Validates against Zod schema
+        \item Automatically strips markdown code blocks
+        \item Used for Auto mode metadata generation
+    \end{itemize}
+
+    \item \texttt{generateImage(prompt, aspectRatio, model)}
+    \begin{itemize}
+        \item Generates images from text prompts
+        \item Supports multiple aspect ratios
+        \item Handles various response formats:
+        \begin{itemize}
+            \item Direct base64 data URLs
+            \item HTTP/HTTPS URLs
+            \item Markdown-wrapped URLs
+        \end{itemize}
+        \item Returns base64-encoded image data
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Retry Logic Implementation:}
+\begin{lstlisting}[language=typescript,caption=Exponential Backoff]
+const delays = [1000, 2000, 4000, 8000, 60000];
+for (let i = 0; i < maxRetries; i++) {
+  try {
+    // API call
+    return result;
+  } catch (error) {
+    if (shouldRetry(error) && i < maxRetries - 1) {
+      await sleep(delays[i]);
+      continue;
+    }
+    throw error;
+  }
+}
+\end{lstlisting}
+
+\subsection{lib/imageOverlay.ts}
+
+\textbf{Purpose:} Canvas-based text rendering for classic meme style
+
+\textbf{Features:}
+\begin{itemize}
+    \item Impact font (quintessential meme typography)
+    \item White text with black outline
+    \item Automatic word wrapping for long text
+    \item Dynamic font sizing based on image dimensions
+    \item Position-based placement (top/center/bottom)
+    \item Multi-caption support
+\end{itemize}
+
+\textbf{Text Rendering Algorithm:}
+\begin{lstlisting}[language=typescript]
+// 1. Load image and create canvas
+const image = await loadImage(base64Data);
+const canvas = createCanvas(image.width, image.height);
+const ctx = canvas.getContext('2d');
+
+// 2. Draw base image
+ctx.drawImage(image, 0, 0);
+
+// 3. For each caption
+for (const caption of captions) {
+  // Set font
+  ctx.font = `bold ${fontSize}px Impact`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+
+  // Calculate position
+  const x = canvas.width / 2;
+  const y = getYPosition(caption.position, canvas.height);
+
+  // Draw stroke (black outline)
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = strokeWidth;
+  ctx.strokeText(caption.text, x, y);
+
+  // Draw fill (white text)
+  ctx.fillStyle = 'white';
+  ctx.fillText(caption.text, x, y);
+}
+
+// 4. Export as PNG
+return canvas.toDataURL('image/png');
+\end{lstlisting}
+
+\subsection{lib/schemas.ts}
+
+\textbf{Purpose:} Type safety and runtime validation with Zod
+
+\textbf{Schemas Defined:}
+
+\begin{enumerate}
+    \item \texttt{captionSchema}
+    \begin{lstlisting}[language=typescript]
+z.object({
+  text: z.string(),
+  position: z.enum(['top', 'bottom', 'center'])
+})
+    \end{lstlisting}
+
+    \item \texttt{memePromptSchema}
+    \begin{lstlisting}[language=typescript]
+z.object({
+  sceneDescription: z.string(),
+  style: z.string(),
+  mood: z.string(),
+  captions: z.array(captionSchema),
+  aspectRatio: z.enum([
+    '1:1', '16:9', '4:3', '9:16', '3:4'
+  ])
+})
+    \end{lstlisting}
+\end{enumerate}
+
+\textbf{Utility Function:}
+\begin{itemize}
+    \item \texttt{zodToJsonSchema(zodSchema)}: Converts Zod schemas to JSON Schema format for Gemini's structured output API
+\end{itemize}
+
+\subsection{lib/db.ts}
+
+\textbf{Purpose:} SQLite database abstraction layer
+
+\textbf{Core Functions:}
+
+\begin{enumerate}
+    \item \texttt{initializeDatabase()}
+    \begin{itemize}
+        \item Creates database file if not exists
+        \item Creates tables: users, memes
+        \item Creates indexes for optimization
+        \item Runs on first import (auto-initialization)
+    \end{itemize}
+
+    \item \texttt{saveMeme(userId, mode, userInput, prompt, imageData, metadata)}
+    \begin{itemize}
+        \item Inserts new meme record
+        \item Returns inserted row ID
+        \item Handles JSON serialization for metadata
+    \end{itemize}
+
+    \item \texttt{getRecentMemes(limit)}
+    \begin{itemize}
+        \item Retrieves recent memes sorted by creation date
+        \item Default limit: 50
+        \item Returns array of meme objects
+    \end{itemize}
+\end{enumerate}
+
+% ============================================
+% SECTION 9: FEATURES & CAPABILITIES
+% ============================================
+
+\section{Key Features \& Capabilities}
+
+\subsection{Dual Generation Modes}
+
+\begin{tcolorbox}[colback=yellow!10,colframe=orange!80!black,title=Auto Mode]
+\textbf{Best for:} Users who want AI assistance
+
+\textbf{How it works:}
+\begin{enumerate}
+    \item User provides a simple idea
+    \item AI generates structured meme specification
+    \item AI creates image based on specification
+    \item Optional programmatic text overlay
+\end{enumerate}
+
+\textbf{Advantages:}
+\begin{itemize}
+    \item Quick and easy
+    \item No prompt engineering required
+    \item Consistent meme structure
+    \item AI-optimized scene descriptions
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=cyan!10,colframe=blue!80!black,title=Manual Mode]
+\textbf{Best for:} Users who want full control
+
+\textbf{How it works:}
+\begin{enumerate}
+    \item User writes detailed image prompt
+    \item Selects aspect ratio
+    \item AI generates image directly
+    \item Optional blank template for custom text
+\end{enumerate}
+
+\textbf{Advantages:}
+\begin{itemize}
+    \item Complete creative control
+    \item Faster (single AI call)
+    \item Support for non-meme images
+    \item Precise prompt execution
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Text Handling Options}
+
+\begin{enumerate}
+    \item \textbf{AI-Generated Text}
+    \begin{itemize}
+        \item Text embedded in image by AI model
+        \item Fastest option (no post-processing)
+        \item Quality varies (may have typos/artifacts)
+    \end{itemize}
+
+    \item \textbf{Programmatic Overlay}
+    \begin{itemize}
+        \item Server-side Canvas rendering
+        \item Classic meme typography (Impact font)
+        \item Guaranteed text quality
+        \item Slight performance overhead
+    \end{itemize}
+
+    \item \textbf{Interactive Text Editor}
+    \begin{itemize}
+        \item Full customization control
+        \item Real-time preview
+        \item Multiple text layers
+        \item Best for blank templates
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Blank Template Mode}
+
+\textbf{Use Case:} Generate image backgrounds without text, then add custom text
+
+\textbf{Workflow:}
+\begin{enumerate}
+    \item Select Manual mode
+    \item Enable "Blank Template" checkbox
+    \item Write prompt (text will be automatically excluded)
+    \item Generate image
+    \item Text editor opens automatically
+    \item Add custom text layers with full control
+\end{enumerate}
+
+\textbf{Benefits:}
+\begin{itemize}
+    \item Avoid AI text quality issues
+    \item Precise text positioning
+    \item Typography customization
+    \item Multi-language support
+\end{itemize}
+
+\subsection{Database Persistence}
+
+\textbf{What's Stored:}
+\begin{itemize}
+    \item All generated memes (base64 image data)
+    \item Original user inputs
+    \item Generated prompts
+    \item Metadata (style, mood, captions, aspect ratio)
+    \item Creation timestamps
+    \item Generation mode
+\end{itemize}
+
+\textbf{Benefits:}
+\begin{itemize}
+    \item View meme history anytime
+    \item Learn from previous prompts
+    \item Track API usage
+    \item Export data for analysis
+    \item No data loss on refresh
+\end{itemize}
+
+\subsection{Production-Ready Error Handling}
+
+\textbf{Retry Logic:}
+\begin{itemize}
+    \item Automatic retry on transient failures
+    \item Exponential backoff (1s → 2s → 4s → 8s → 60s)
+    \item Special handling for rate limits (429, 503)
+    \item Maximum 5 retry attempts
+\end{itemize}
+
+\textbf{Error Types Handled:}
+\begin{itemize}
+    \item Network failures
+    \item API rate limits
+    \item Timeout errors
+    \item Invalid responses
+    \item Malformed JSON
+    \item Image format errors
+\end{itemize}
+
+\textbf{User Experience:}
+\begin{itemize}
+    \item Clear error messages
+    \item Loading states during retries
+    \item Graceful degradation
+    \item No silent failures
+\end{itemize}
+
+\subsection{Responsive Design}
+
+\textbf{Features:}
+\begin{itemize}
+    \item Mobile-first approach
+    \item Tailwind CSS responsive utilities
+    \item Dark mode support
+    \item Touch-friendly UI elements
+    \item Adaptive grid layouts
+\end{itemize}
+
+\textbf{Supported Devices:}
+\begin{itemize}
+    \item Desktop (1920px+)
+    \item Laptop (1280px-1920px)
+    \item Tablet (768px-1280px)
+    \item Mobile (320px-768px)
+\end{itemize}
+
+% ============================================
+% SECTION 10: DEPLOYMENT
+% ============================================
+
+\section{Deployment \& Setup}
+
+\subsection{Environment Configuration}
+
+\textbf{Required Environment Variables (.env):}
+
+\begin{lstlisting}[caption=.env File]
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# OpenRouter API
+OPENROUTER_API_KEY=sk-or-v1-...
+
+# Application Metadata
+SITE_URL=http://localhost:3000
+SITE_NAME=AI Meme Generator
+\end{lstlisting}
+
+\subsection{Local Development Setup}
+
+\begin{enumerate}
+    \item \textbf{Prerequisites}
+    \begin{itemize}
+        \item Node.js 18+ (with npm)
+        \item Git
+        \item OpenRouter API key
+    \end{itemize}
+
+    \item \textbf{Installation}
+    \begin{lstlisting}[language=bash]
+# Clone repository
+git clone <repository-url>
+cd new-meme-bot
+
+# Install dependencies
+npm install
+
+# Create .env file
+cp .env.example .env
+# Edit .env with your API key
+
+# Initialize database (automatic on first run)
+# Tables created in: ./meme_database.sqlite
+
+# Start development server
+npm run dev
+    \end{lstlisting}
+
+    \item \textbf{Access Application}
+    \begin{itemize}
+        \item URL: \texttt{http://localhost:3000}
+        \item Hot reload enabled
+        \item API routes available at \texttt{/api/*}
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Production Deployment}
+
+\textbf{Build Process:}
+\begin{lstlisting}[language=bash]
+# Build optimized production bundle
+npm run build
+
+# Start production server
+npm run start
+\end{lstlisting}
+
+\textbf{Deployment Platforms:}
+\begin{itemize}
+    \item \textbf{Vercel} (Recommended for Next.js)
+    \begin{itemize}
+        \item Automatic deployments from Git
+        \item Serverless functions for API routes
+        \item Edge network CDN
+        \item Environment variable management
+    \end{itemize}
+
+    \item \textbf{Railway/Render}
+    \begin{itemize}
+        \item Full server deployment
+        \item Persistent SQLite database
+        \item Custom domain support
+    \end{itemize}
+
+    \item \textbf{AWS/Google Cloud}
+    \begin{itemize}
+        \item Docker containerization
+        \item Scalable infrastructure
+        \item Load balancing
+    \end{itemize}
+\end{itemize}
+
+\subsection{Database Considerations}
+
+\textbf{Development:}
+\begin{itemize}
+    \item SQLite file: \texttt{./meme\_database.sqlite}
+    \item Auto-created on first run
+    \item Committed to Git (contains sample data)
+\end{itemize}
+
+\textbf{Production:}
+\begin{itemize}
+    \item SQLite suitable for single-server deployments
+    \item For scaling: Migrate to PostgreSQL/MySQL
+    \item Implement image storage (S3, Cloudinary)
+    \item Add database backups
+\end{itemize}
+
+% ============================================
+% SECTION 11: FUTURE ENHANCEMENTS
+% ============================================
+
+\section{Future Enhancements}
+
+\subsection{Planned Features}
+
+\begin{enumerate}
+    \item \textbf{User Authentication}
+    \begin{itemize}
+        \item OAuth integration (Google, GitHub)
+        \item Personal meme galleries
+        \item API usage tracking per user
+        \item Privacy controls
+    \end{itemize}
+
+    \item \textbf{Social Features}
+    \begin{itemize}
+        \item Public meme sharing
+        \item Like/favorite system
+        \item Community gallery
+        \item Meme templates library
+    \end{itemize}
+
+    \item \textbf{Advanced Editing}
+    \begin{itemize}
+        \item Image filters and effects
+        \item Sticker/emoji overlay
+        \item Multiple image panels (comic strips)
+        \item Animation support (GIFs)
+    \end{itemize}
+
+    \item \textbf{AI Improvements}
+    \begin{itemize}
+        \item Style transfer capabilities
+        \item Face detection and emotion analysis
+        \item Context-aware caption suggestions
+        \item Multi-model comparison
+    \end{itemize}
+
+    \item \textbf{Performance Optimization}
+    \begin{itemize}
+        \item Image CDN integration
+        \item Redis caching for API responses
+        \item Progressive image loading
+        \item Batch generation queue
+    \end{itemize}
+
+    \item \textbf{Analytics Dashboard}
+    \begin{itemize}
+        \item Generation statistics
+        \item Popular styles/themes
+        \item API usage graphs
+        \item Cost tracking
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Scalability Roadmap}
+
+\begin{tcolorbox}[colback=purple!5,colframe=purple!60!black,title=Phase 1: Single Server (Current)]
+\begin{itemize}
+    \item SQLite database
+    \item Next.js server rendering
+    \item Local image storage
+    \item Up to 1000 users
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=purple!10,colframe=purple!60!black,title=Phase 2: Horizontal Scaling]
+\begin{itemize}
+    \item Migrate to PostgreSQL
+    \item Separate image storage (S3/Cloudinary)
+    \item Redis session management
+    \item Load balancer
+    \item Up to 100k users
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=purple!15,colframe=purple!60!black,title=Phase 3: Microservices]
+\begin{itemize}
+    \item Separate AI service
+    \item Image processing workers
+    \item API gateway
+    \item Kubernetes orchestration
+    \item Unlimited scaling
+\end{itemize}
+\end{tcolorbox}
+
+% ============================================
+% SECTION 12: HACKATHON PRESENTATION TIPS
+% ============================================
+
+\section{Hackathon Presentation Guide}
+
+\subsection{Demo Script (5 Minutes)}
+
+\textbf{Minute 1: Problem Statement}
+\begin{quote}
+"Meme creation traditionally requires design skills, photo editing software, and time. Our AI Meme Generator eliminates these barriers, enabling anyone to create professional memes in seconds."
+\end{quote}
+
+\textbf{Minute 2: Auto Mode Demo}
+\begin{enumerate}
+    \item Open application
+    \item Enter idea: "cat surprised by technology"
+    \item Add optional captions
+    \item Enable programmatic overlay
+    \item Generate and show result
+    \item Highlight metadata generation
+\end{enumerate}
+
+\textbf{Minute 3: Manual Mode + Text Editor Demo}
+\begin{enumerate}
+    \item Switch to Manual mode
+    \item Write detailed prompt
+    \item Enable "Blank Template"
+    \item Generate image
+    \item Show text editor auto-opening
+    \item Add multiple text layers
+    \item Customize fonts, colors, positions
+    \item Save final meme
+\end{enumerate}
+
+\textbf{Minute 4: Technical Highlights}
+\begin{itemize}
+    \item Show history gallery
+    \item Explain dual AI model architecture
+    \item Mention retry logic (open Network tab)
+    \item Show database in VS Code
+    \item Highlight responsive design
+\end{itemize}
+
+\textbf{Minute 5: Impact \& Future}
+\begin{itemize}
+    \item Use cases: Marketing, education, social media
+    \item Scalability plan
+    \item Potential monetization
+    \item Open for questions
+\end{itemize}
+
+\subsection{Key Talking Points}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!60!black,title=Technical Excellence]
+\begin{itemize}
+    \item \textbf{Modern Stack}: Next.js 16, React 19, TypeScript 5.9
+    \item \textbf{AI Integration}: Dual model architecture (JSON + Image)
+    \item \textbf{Production-Ready}: Exponential backoff, error handling
+    \item \textbf{Type Safety}: Full TypeScript + Zod validation
+    \item \textbf{Performance}: Server-side rendering, optimized APIs
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=blue!5,colframe=blue!60!black,title=User Experience]
+\begin{itemize}
+    \item \textbf{Dual Modes}: Flexibility for all user types
+    \item \textbf{Interactive Editor}: Real-time preview, full customization
+    \item \textbf{Blank Templates}: Professional text quality
+    \item \textbf{History Tracking}: Never lose a creation
+    \item \textbf{Responsive Design}: Works on all devices
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=orange!5,colframe=orange!60!black,title=Innovation}
+\begin{itemize}
+    \item \textbf{Structured Generation}: AI creates meme specifications
+    \item \textbf{Hybrid Text}: AI-generated + programmatic overlay
+    \item \textbf{Smart Retry}: Handles API failures gracefully
+    \item \textbf{Multiple Formats}: Support for various aspect ratios
+    \item \textbf{Extensible}: Ready for future features
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Anticipated Questions}
+
+\textbf{Q: Why use two different AI models?}
+
+A: Gemini Flash Lite excels at structured JSON generation, while Nano Banana specializes in image generation. This separation of concerns improves quality and allows us to optimize each step independently.
+
+\textbf{Q: How do you handle API rate limits?}
+
+A: We implement exponential backoff retry logic with 5 attempts and increasing delays (1s to 60s). This handles transient failures gracefully while respecting API constraints.
+
+\textbf{Q: Why SQLite instead of PostgreSQL?}
+
+A: For the MVP and single-server deployments, SQLite provides simplicity, zero configuration, and excellent performance. Our schema is designed to migrate easily to PostgreSQL when scaling.
+
+\textbf{Q: How much does it cost per meme?}
+
+A: OpenRouter API costs vary by model. Gemini Flash Lite is approximately \$0.0001 per request, and Nano Banana is around \$0.001 per image. Total cost per meme: ~\$0.0011.
+
+\textbf{Q: Can users upload their own images?}
+
+A: Not currently, but it's a planned feature. The architecture supports it—we'd add an upload endpoint and modify the text editor to accept external images.
+
+\textbf{Q: How do you ensure meme quality?}
+
+A: We use high-quality AI models, provide programmatic text overlay for perfect typography, and offer an interactive editor for fine-tuning. Users have full control over the final output.
+
+% ============================================
+% SECTION 13: TECHNICAL DEEP DIVE
+% ============================================
+
+\section{Technical Deep Dive}
+
+\subsection{Why Next.js App Router?}
+
+\textbf{Advantages Over Traditional React:}
+\begin{enumerate}
+    \item \textbf{Server Components}
+    \begin{itemize}
+        \item Reduced JavaScript bundle size
+        \item Faster initial page load
+        \item Improved SEO
+    \end{itemize}
+
+    \item \textbf{Built-in API Routes}
+    \begin{itemize}
+        \item No separate backend server needed
+        \item Shared TypeScript types between frontend/backend
+        \item Simplified deployment
+    \end{itemize}
+
+    \item \textbf{Automatic Optimizations}
+    \begin{itemize}
+        \item Image optimization
+        \item Code splitting
+        \item Prefetching
+        \item Compression
+    \end{itemize}
+
+    \item \textbf{File-based Routing}
+    \begin{itemize}
+        \item Intuitive project structure
+        \item Automatic route generation
+        \item Layout composition
+    \end{itemize}
+\end{enumerate}
+
+\subsection{OpenRouter vs Direct Gemini API}
+
+\textbf{Why OpenRouter?}
+\begin{itemize}
+    \item \textbf{Model Flexibility}: Access to 400+ models with one API key
+    \item \textbf{Unified Interface}: Consistent API across providers
+    \item \textbf{Cost Optimization}: Compare models and choose best value
+    \item \textbf{No Vendor Lock-in}: Easy to switch models
+    \item \textbf{Built-in Retry}: Some retry logic provided
+\end{itemize}
+
+\textbf{Trade-offs:}
+\begin{itemize}
+    \item Additional abstraction layer (slight latency)
+    \item Dependency on third-party service
+    \item Potential for OpenRouter downtime
+\end{itemize}
+
+\subsection{Canvas vs AI-Generated Text}
+
+\textbf{Comparison Table:}
+
+\begin{center}
+\begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Aspect} & \textbf{AI-Generated} & \textbf{Canvas Overlay} \\
+\hline
+Speed & Faster (single API call) & Slower (extra processing) \\
+\hline
+Quality & Variable (may have typos) & Consistent (programmatic) \\
+\hline
+Typography & AI's interpretation & Classic Impact font \\
+\hline
+Positioning & AI decides & Precise control \\
+\hline
+Multi-language & Excellent & Good (font support) \\
+\hline
+Customization & Limited & Full control \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Type Safety with Zod}
+
+\textbf{Benefits:}
+\begin{enumerate}
+    \item \textbf{Runtime Validation}
+    \begin{itemize}
+        \item TypeScript only validates at compile time
+        \item Zod validates actual API responses
+        \item Catches unexpected data shapes
+    \end{itemize}
+
+    \item \textbf{Type Inference}
+    \begin{lstlisting}[language=typescript]
+const MemePrompt = z.object({
+  sceneDescription: z.string(),
+  style: z.string(),
+});
+
+// TypeScript type automatically inferred
+type MemePrompt = z.infer<typeof MemePrompt>;
+    \end{lstlisting}
+
+    \item \textbf{JSON Schema Conversion}
+    \begin{itemize}
+        \item Convert Zod schemas to JSON Schema
+        \item Pass to Gemini for structured output
+        \item Ensure type consistency
+    \end{itemize}
+\end{enumerate}
+
+% ============================================
+% SECTION 14: CONCLUSION
+% ============================================
+
+\section{Conclusion}
+
+\subsection{Project Summary}
+
+The AI Meme Generator successfully demonstrates:
+\begin{itemize}
+    \item \textbf{Full-stack Development}: Modern React frontend with Next.js backend
+    \item \textbf{AI Integration}: Dual model architecture for optimal results
+    \item \textbf{User Experience}: Intuitive interface with multiple creation modes
+    \item \textbf{Production Readiness}: Error handling, retry logic, persistence
+    \item \textbf{Scalability}: Architecture designed for growth
+\end{itemize}
+
+\subsection{Key Achievements}
+
+\begin{enumerate}
+    \item Reduced meme creation time from minutes to seconds
+    \item Eliminated need for design software or skills
+    \item Implemented production-grade error handling
+    \item Created flexible dual-mode generation system
+    \item Built interactive text editor with real-time preview
+    \item Established persistent history tracking
+\end{enumerate}
+
+\subsection{Learning Outcomes}
+
+\textbf{Technical Skills:}
+\begin{itemize}
+    \item Next.js 14+ App Router architecture
+    \item AI API integration and prompt engineering
+    \item Canvas-based image manipulation
+    \item SQLite database design and optimization
+    \item TypeScript advanced patterns
+    \item Error handling and retry strategies
+\end{itemize}
+
+\textbf{Soft Skills:}
+\begin{itemize}
+    \item User experience design
+    \item API cost optimization
+    \item Trade-off analysis (speed vs quality)
+    \item Documentation writing
+    \item Presentation preparation
+\end{itemize}
+
+\subsection{Final Thoughts}
+
+This project showcases how modern web technologies and AI can be combined to create powerful, user-friendly applications. The dual-mode approach provides flexibility for both casual users and creative professionals, while the robust error handling ensures a reliable experience.
+
+The architecture is designed for extensibility, with clear paths for adding user authentication, social features, and advanced editing capabilities. Whether deployed as a personal tool or scaled to serve thousands of users, the foundation is solid.
+
+\vspace{1cm}
+
+\begin{tcolorbox}[colback=red!5,colframe=red!60!black,title=Remember for Hackathon]
+\begin{itemize}
+    \item \textbf{Start with the demo}: Show don't tell
+    \item \textbf{Highlight innovation}: Dual AI models, hybrid text approach
+    \item \textbf{Emphasize UX}: Easy for beginners, powerful for experts
+    \item \textbf{Show technical depth}: Retry logic, type safety, database design
+    \item \textbf{Discuss scalability}: Clear path from MVP to production
+    \item \textbf{Be enthusiastic}: Your passion is contagious!
+\end{itemize}
+\end{tcolorbox}
+
+\vspace{1cm}
+
+\begin{center}
+\Large{\textbf{Good luck with your hackathon presentation!}}
+\end{center}
+
+% ============================================
+% APPENDIX
+% ============================================
+
+\newpage
+\appendix
+
+\section{Environment Setup Checklist}
+
+\begin{enumerate}
+    \item[$\square$] Node.js 18+ installed
+    \item[$\square$] Git configured
+    \item[$\square$] OpenRouter API key obtained
+    \item[$\square$] Repository cloned
+    \item[$\square$] Dependencies installed (\texttt{npm install})
+    \item[$\square$] .env file created and configured
+    \item[$\square$] Development server running (\texttt{npm run dev})
+    \item[$\square$] Database initialized (automatic)
+    \item[$\square$] Test meme generated successfully
+    \item[$\square$] History view working
+\end{enumerate}
+
+\section{Quick Reference: API Endpoints}
+
+\begin{tabular}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Endpoint} & \textbf{Method} & \textbf{Purpose} \\
+\hline
+/api/meme/auto & POST & Auto mode generation \\
+\hline
+/api/meme/manual & POST & Manual mode generation \\
+\hline
+/api/meme/add-text & POST & Text overlay rendering \\
+\hline
+/api/meme/history & GET & Retrieve meme history \\
+\hline
+\end{tabular}
+
+\section{Common Issues \& Solutions}
+
+\textbf{Issue: API key not working}
+\begin{itemize}
+    \item Verify .env file exists in root directory
+    \item Check API key format: \texttt{sk-or-v1-...}
+    \item Restart development server
+\end{itemize}
+
+\textbf{Issue: Database not initializing}
+\begin{itemize}
+    \item Check file permissions
+    \item Delete meme\_database.sqlite and restart
+    \item Verify better-sqlite3 installation
+\end{itemize}
+
+\textbf{Issue: Images not generating}
+\begin{itemize}
+    \item Check OpenRouter API status
+    \item Verify internet connection
+    \item Review console for error messages
+    \item Test with simpler prompts
+\end{itemize}
+
+\section{Resources}
+
+\begin{itemize}
+    \item Next.js Documentation: \url{https://nextjs.org/docs}
+    \item OpenRouter API Docs: \url{https://openrouter.ai/docs}
+    \item React Documentation: \url{https://react.dev}
+    \item Tailwind CSS: \url{https://tailwindcss.com/docs}
+    \item TypeScript Handbook: \url{https://www.typescriptlang.org/docs}
+    \item Zod Documentation: \url{https://zod.dev}
+\end{itemize}
+
+\end{document}
