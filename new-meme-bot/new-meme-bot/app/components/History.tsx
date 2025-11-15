@@ -46,7 +46,6 @@ export default function History() {
     return date.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     });
@@ -64,18 +63,18 @@ export default function History() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-600">Loading history...</div>
+        <div className="text-gray-400">Loading history...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-700">Error: {error}</p>
+      <div className="bg-red-900/20 border border-red-800 rounded-lg p-4">
+        <p className="text-red-400 text-sm">Error: {error}</p>
         <button
           onClick={fetchHistory}
-          className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+          className="mt-2 text-sm text-red-400 hover:text-red-300 underline"
         >
           Try again
         </button>
@@ -86,157 +85,164 @@ export default function History() {
   if (memes.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">No memes generated yet. Start creating!</p>
+        <p className="text-gray-400">No memes generated yet. Start creating!</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Meme History ({memes.length})</h2>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Meme History ({memes.length})</h2>
         <button
           onClick={fetchHistory}
-          className="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          className="px-3 py-1.5 text-sm bg-[#2d2d2d] hover:bg-[#3d3d3d] text-[#10a37f] rounded transition"
         >
-          Refresh
+          🔄 Refresh
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[calc(100vh-200px)] overflow-y-auto">
         {memes.map((meme) => (
-          <div
+          <button
             key={meme.id}
-            className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
             onClick={() => setSelectedMeme(meme)}
+            className="group relative aspect-square bg-[#1a1a1a] border border-[#404040] rounded-lg overflow-hidden hover:border-[#10a37f] transition-all"
           >
-            <div className="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
-              {meme.image_data ? (
-                <img
-                  src={meme.image_data}
-                  alt={`Meme ${meme.id}`}
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <div className="text-gray-400">No image</div>
-              )}
-            </div>
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className={`px-2 py-1 text-xs font-semibold rounded ${
-                  meme.mode === 'auto'
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'bg-green-100 text-green-800'
-                }`}>
-                  {meme.mode === 'auto' ? 'Auto' : 'Manual'}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {formatDate(meme.created_at)}
-                </span>
+            {meme.image_data ? (
+              <img
+                src={meme.image_data}
+                alt={`Meme ${meme.id}`}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-500">
+                No image
               </div>
-              <p className="text-sm text-gray-700 line-clamp-2">
-                {meme.user_input}
-              </p>
+            )}
+
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+              <span className="text-xs font-semibold text-white">
+                #{meme.id}
+              </span>
+              <span
+                className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                  meme.mode === 'auto'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-blue-600 text-white'
+                }`}
+              >
+                {meme.mode === 'auto' ? 'Auto' : 'Manual'}
+              </span>
             </div>
-          </div>
+          </button>
         ))}
       </div>
 
       {/* Modal for viewing meme details */}
       {selectedMeme && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"
           onClick={() => setSelectedMeme(null)}
         >
           <div
-            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-[#1a1a1a] border border-[#404040] rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Meme #{selectedMeme.id}</h3>
-                  <span className={`px-3 py-1 text-sm font-semibold rounded ${
-                    selectedMeme.mode === 'auto'
-                      ? 'bg-purple-100 text-purple-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}>
-                    {selectedMeme.mode === 'auto' ? 'Auto Mode' : 'Manual Mode'}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setSelectedMeme(null)}
-                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
-                >
-                  ×
-                </button>
-              </div>
+            <div className="sticky top-0 bg-[#1a1a1a] border-b border-[#404040] p-4 flex justify-between items-center">
+              <h3 className="text-lg font-bold">Meme #{selectedMeme.id}</h3>
+              <button
+                onClick={() => setSelectedMeme(null)}
+                className="text-gray-400 hover:text-gray-300 text-2xl"
+              >
+                ✕
+              </button>
+            </div>
 
-              <div className="mb-6">
+            <div className="p-6 space-y-6">
+              {/* Image */}
+              <div className="rounded-lg overflow-hidden border border-[#404040]">
                 <img
                   src={selectedMeme.image_data}
                   alt={`Meme ${selectedMeme.id}`}
-                  className="w-full rounded-lg border border-gray-200"
+                  className="w-full"
                 />
               </div>
 
+              {/* Info */}
               <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`px-3 py-1 text-xs font-semibold rounded ${
+                      selectedMeme.mode === 'auto'
+                        ? 'bg-purple-600/20 text-purple-300'
+                        : 'bg-blue-600/20 text-blue-300'
+                    }`}
+                  >
+                    {selectedMeme.mode === 'auto' ? 'Auto Mode' : 'Manual Mode'}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {formatDate(selectedMeme.created_at)}
+                  </span>
+                </div>
+
+                {/* User Input */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-gray-400 mb-2">
                     User Input:
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded border border-gray-200">
+                  <p className="text-sm text-gray-300 bg-[#2d2d2d] p-3 rounded border border-[#404040]">
                     {selectedMeme.user_input}
                   </p>
                 </div>
 
+                {/* Generated Prompt */}
                 {selectedMeme.generated_prompt && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    <label className="block text-xs font-semibold text-gray-400 mb-2">
                       Generated Prompt:
                     </label>
-                    <p className="text-gray-900 bg-gray-50 p-3 rounded border border-gray-200 text-sm">
+                    <p className="text-xs text-gray-400 bg-[#2d2d2d] p-3 rounded border border-[#404040] line-clamp-3">
                       {selectedMeme.generated_prompt}
                     </p>
                   </div>
                 )}
 
+                {/* Captions */}
                 {selectedMeme.metadata && selectedMeme.metadata.captions && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    <label className="block text-xs font-semibold text-gray-400 mb-2">
                       Captions:
                     </label>
                     <div className="space-y-2">
                       {selectedMeme.metadata.captions.map((caption: any, idx: number) => (
-                        <div key={idx} className="bg-gray-50 p-3 rounded border border-gray-200">
-                          <span className="font-medium">{caption.position}:</span> {caption.text}
+                        <div key={idx} className="bg-[#2d2d2d] p-2 rounded border border-[#404040]">
+                          <span className="text-xs font-medium text-gray-400">
+                            {caption.position}:
+                          </span>
+                          <p className="text-xs text-gray-300 mt-1">{caption.text}</p>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+              </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Created:
-                  </label>
-                  <p className="text-gray-900">{formatDate(selectedMeme.created_at)}</p>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={() => downloadMeme(selectedMeme)}
-                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-                  >
-                    Download
-                  </button>
-                  <button
-                    onClick={() => setSelectedMeme(null)}
-                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                  >
-                    Close
-                  </button>
-                </div>
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t border-[#404040]">
+                <button
+                  onClick={() => downloadMeme(selectedMeme)}
+                  className="flex-1 px-4 py-2 bg-[#10a37f] hover:bg-[#0d8966] text-white rounded transition text-sm font-medium"
+                >
+                  💾 Download
+                </button>
+                <button
+                  onClick={() => setSelectedMeme(null)}
+                  className="flex-1 px-4 py-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-gray-300 rounded transition text-sm font-medium"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
